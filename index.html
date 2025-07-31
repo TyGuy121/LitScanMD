@@ -101,7 +101,7 @@
             padding: 5px 10px;
             border-radius: 20px;
             background: #f0f0f0;
-            color: #2c3e50;
+            color: #2c3e50; /* Changed from default (white) to dark color */
         }
 
         .status-dot {
@@ -510,6 +510,13 @@
                     <strong>Note:</strong> For this demo, you can enter any text. Real API integration would require a backend server due to browser security restrictions.
                 </small>
             </div>
+            <div class="api-input-group">
+                <label for="vercel-endpoint">Vercel API Endpoint (Optional for Real Analysis):</label>
+                <input type="text" id="vercel-endpoint" class="api-input" placeholder="https://your-app.vercel.app">
+                <small style="color: #666; font-size: 12px;">
+                    Leave blank for demo mode, or enter your Vercel endpoint for real Claude analysis
+                </small>
+            </div>
             <button class="api-save-btn" onclick="saveApiKeys()">Save and Continue</button>
         </div>
 
@@ -597,17 +604,28 @@
         // Check for saved API keys on load
         window.onload = function() {
             const savedClaudeKey = localStorage.getItem('claude_api_key');
+            const savedVercelEndpoint = localStorage.getItem('vercel_endpoint');
+            
             if (savedClaudeKey) {
                 document.getElementById('claude-api-key').value = savedClaudeKey;
-                document.getElementById('api-config').style.display = 'none';
                 document.getElementById('claude-status').classList.add('active');
             }
+            
+            if (savedVercelEndpoint) {
+                document.getElementById('vercel-endpoint').value = savedVercelEndpoint;
+            }
+            
+            if (savedClaudeKey) {
+                document.getElementById('api-config').style.display = 'none';
+            }
+            
             // PubMed API doesn't require a key
             document.getElementById('pubmed-status').classList.add('active');
         };
 
         function saveApiKeys() {
             const claudeKey = document.getElementById('claude-api-key').value;
+            const vercelEndpoint = document.getElementById('vercel-endpoint').value;
             
             if (!claudeKey) {
                 // For demo, allow proceeding without a key
@@ -622,9 +640,18 @@
             }
 
             localStorage.setItem('claude_api_key', claudeKey);
+            if (vercelEndpoint) {
+                localStorage.setItem('vercel_endpoint', vercelEndpoint.replace(/\/$/, '')); // Remove trailing slash
+            }
+            
             document.getElementById('api-config').style.display = 'none';
             document.getElementById('claude-status').classList.add('active');
-            alert('Configuration saved! You can now search for compounds.');
+            
+            if (vercelEndpoint) {
+                alert('Configuration saved! Real Claude AI analysis enabled.');
+            } else {
+                alert('Configuration saved! You can now search for compounds.');
+            }
         }
 
         function quickSearch(query) {
@@ -761,11 +788,34 @@
         }
 
         async function analyzePapers(papers, claudeKey) {
-            // For demonstration, we'll add mock analysis
-            // In a real implementation, you would call Claude API here
-            // Note: Claude API cannot be called directly from browser due to CORS restrictions
-            // This would need a backend server in production
+            // Check if we have a Vercel endpoint configured
+            const vercelEndpoint = localStorage.getItem('vercel_endpoint');
             
+            if (vercelEndpoint && claudeKey !== 'demo-mode') {
+                try {
+                    // Make real API call to your Vercel function
+                    const response = await fetch(`${vercelEndpoint}/api/analyze`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ papers })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        return data.papers;
+                    } else {
+                        throw new Error('API call failed');
+                    }
+                } catch (error) {
+                    console.error('Error calling Claude API:', error);
+                    alert('Failed to analyze with Claude API. Falling back to demo mode.');
+                    // Fall back to mock analysis
+                }
+            }
+            
+            // Default mock analysis (when no endpoint or in demo mode)
             const safetyKeywords = ['adverse', 'toxicity', 'interaction', 'safety', 'side effect', 'hepatotoxicity', 'cardiotoxicity', 'risk', 'contraindication', 'warning'];
             
             return papers.map((paper, index) => {
