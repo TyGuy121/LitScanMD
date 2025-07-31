@@ -1,1 +1,30 @@
-{\n  "name": "litscan-ai-backend",\n  "version": "1.0.0",\n  "description": "Backend API for LitScan AI - Scientific Literature Analyzer",\n  "main": "api/analyze.js",\n  "scripts": {\n    "dev": "vercel dev",\n    "build": "echo 'No build step needed for serverless functions'",\n    "deploy": "vercel --prod"\n  },\n  "dependencies": {\n    "@anthropic-ai/sdk": "^0.24.2",\n    "axios": "^1.6.7"\n  },\n  "devDependencies": {\n    "vercel": "^32.0.0"\n  },\n  "engines": {\n    "node": ">=18.0.0"\n  },\n  "keywords": [\n    "ai",\n    "literature-analysis",\n    "pharmacovigilance",\n    "claude",\n    "pubmed"\n  ],\n  "author": "Your Name",\n  "license": "MIT"\n}
+{
+  "name": "litscan-ai-backend",
+  "version": "1.0.0",
+  "description": "Backend API for LitScan AI - Scientific Literature Analyzer",
+  "main": "api/analyze.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step needed for serverless functions'",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.24.2",
+    "axios": "^1.6.7"
+  },
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "ai",
+    "literature-analysis",
+    "pharmacovigilance",
+    "claude",
+    "pubmed"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
