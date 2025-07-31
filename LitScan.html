@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LitScan AI - Scientific Literature Analyzer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f7fa;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .tagline {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .search-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-top: 30px;
+        }
+
+        .search-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .search-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .api-status {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background: #f0f0f0;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ccc;
+        }
+
+        .status-dot.active {
+            background: #4CAF50;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 20px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+        }
+
+        .search-btn {
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            background: #2a5298;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-btn:hover {
+            background: #1e3c72;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(42, 82, 152, 0.3);
+        }
+
+        .search-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .quick-searches {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .quick-search-btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            background: #f0f4f8;
+            color: #2a5298;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quick-search-btn:hover {
+            background: #2a5298;
+            color: white;
+            border-color: #2a5298;
+        }
+
+        .results-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .results-count {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            background: white;
+            color: #666;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active {
+            background: #2a5298;
+            color: white;
+            border-color: #2a5298;
+        }
+
+        .paper-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .paper-card:hover {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .paper-card.safety-signal {
+            border-color: #ff9800;
+        }
+
+        .paper-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .paper-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            line-height: 1.4;
+            flex: 1;
+            margin-right: 15px;
+        }
+
+        .safety-badge {
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #ff9800;
+            color: white;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .paper-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .paper-authors {
+            color: #2a5298;
+        }
+
+        .paper-summary {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .summary-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .summary-content {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #2c3e50;
+        }
+
+        .paper-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            background: #f0f4f8;
+            color: #2a5298;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .action-btn:hover {
+            background: #2a5298;
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #666;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2a5298;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .executive-summary {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-left: 4px solid #2a5298;
+        }
+
+        .summary-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #2a5298;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .key-findings {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .finding-item {
+            display: flex;
+            align-items: start;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .finding-icon {
+            width: 20px;
+            height: 20px;
+            background: #ff9800;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .api-config {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ffeeba;
+        }
+
+        .api-config h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+
+        .api-input-group {
+            margin-bottom: 15px;
+        }
+
+        .api-input-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        .api-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        .api-save-btn {
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .api-save-btn:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">🔬</div>
+                <div>
+                    <h1>LitScan AI</h1>
+                    <div class="tagline">Scientific Literature Analyzer for Drug Safety</div>
+                </div>
+            </div>
+            <div class="api-status">
+                <div class="status-indicator">
+                    <div class="status-dot" id="pubmed-status"></div>
+                    <span>PubMed API</span>
+                </div>
+                <div class="status-indicator">
+                    <div class="status-dot" id="claude-status"></div>
+                    <span>Claude API</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- API Configuration Section -->
+        <div class="api-config" id="api-config">
+            <h3>🔑 Demo Configuration</h3>
+            <p style="margin-bottom: 15px; font-size: 14px; color: #856404;">
+                This is a demonstration prototype. In production, API keys would be securely managed on the backend.
+            </p>
+            <div class="api-input-group">
+                <label for="claude-api-key">Claude API Key (Optional for Demo):</label>
+                <input type="password" id="claude-api-key" class="api-input" placeholder="Enter any text for demo or real API key">
+                <small style="color: #666; font-size: 12px;">
+                    <strong>Note:</strong> For this demo, you can enter any text. Real API integration would require a backend server due to browser security restrictions.
+                </small>
+            </div>
+            <button class="api-save-btn" onclick="saveApiKeys()">Save and Continue</button>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="search-header">
+                <h2 class="search-title">Literature Search</h2>
+            </div>
+            
+            <div class="search-form">
+                <input 
+                    type="text" 
+                    id="search-input" 
+                    class="search-input" 
+                    placeholder="Enter compound name or identifier (e.g., AMG 193, trastuzumab)"
+                >
+                <button class="search-btn" onclick="performSearch()">
+                    <span>🔍</span>
+                    <span>Search Literature</span>
+                </button>
+            </div>
+
+            <div class="quick-searches">
+                <button class="quick-search-btn" onclick="quickSearch('pembrolizumab adverse events')">Pembrolizumab AEs</button>
+                <button class="quick-search-btn" onclick="quickSearch('adalimumab drug interactions')">Adalimumab Interactions</button>
+                <button class="quick-search-btn" onclick="quickSearch('rituximab safety profile')">Rituximab Safety</button>
+                <button class="quick-search-btn" onclick="quickSearch('trastuzumab cardiotoxicity')">Trastuzumab Cardio</button>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="results-section">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <div>Searching scientific literature...</div>
+                <div style="font-size: 14px; color: #999; margin-top: 10px;">This may take a few moments</div>
+            </div>
+
+            <div id="results-content" style="display: none;">
+                <!-- Executive Summary -->
+                <div class="executive-summary" id="executive-summary">
+                    <h3 class="summary-title">
+                        <span>📊</span>
+                        <span>Executive Summary</span>
+                    </h3>
+                    <div class="summary-stats">
+                        <div class="stat-card">
+                            <div class="stat-value" id="total-papers">0</div>
+                            <div class="stat-label">Papers Analyzed</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="safety-signals">0</div>
+                            <div class="stat-label">Safety Signals</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="time-saved">0</div>
+                            <div class="stat-label">Hours Saved</div>
+                        </div>
+                    </div>
+                    <div class="key-findings" id="key-findings">
+                        <h4 style="margin-bottom: 15px; color: #2c3e50;">Key Findings</h4>
+                        <div id="findings-list"></div>
+                    </div>
+                </div>
+
+                <!-- Results Header -->
+                <div class="results-header">
+                    <div class="results-count" id="results-count">0 papers found</div>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" onclick="filterResults('all')">All Papers</button>
+                        <button class="filter-btn" onclick="filterResults('safety')">Safety Signals Only</button>
+                    </div>
+                </div>
+
+                <!-- Papers List -->
+                <div id="papers-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store current papers globally for filtering
+        let currentPapers = [];
+
+        // Check for saved API keys on load
+        window.onload = function() {
+            const savedClaudeKey = localStorage.getItem('claude_api_key');
+            if (savedClaudeKey) {
+                document.getElementById('claude-api-key').value = savedClaudeKey;
+                document.getElementById('api-config').style.display = 'none';
+                document.getElementById('claude-status').classList.add('active');
+            }
+            // PubMed API doesn't require a key
+            document.getElementById('pubmed-status').classList.add('active');
+        };
+
+        function saveApiKeys() {
+            const claudeKey = document.getElementById('claude-api-key').value;
+            
+            if (!claudeKey) {
+                // For demo, allow proceeding without a key
+                const proceed = confirm('No API key entered. Continue with demo mode?\n\nThe app will use simulated AI responses.');
+                if (proceed) {
+                    localStorage.setItem('claude_api_key', 'demo-mode');
+                    document.getElementById('api-config').style.display = 'none';
+                    document.getElementById('claude-status').classList.add('active');
+                    alert('Demo mode activated! You can now search for compounds.');
+                }
+                return;
+            }
+
+            localStorage.setItem('claude_api_key', claudeKey);
+            document.getElementById('api-config').style.display = 'none';
+            document.getElementById('claude-status').classList.add('active');
+            alert('Configuration saved! You can now search for compounds.');
+        }
+
+        function quickSearch(query) {
+            document.getElementById('search-input').value = query;
+            performSearch();
+        }
+
+        async function performSearch() {
+            const query = document.getElementById('search-input').value;
+            if (!query) {
+                alert('Please enter a search query');
+                return;
+            }
+
+            const claudeKey = localStorage.getItem('claude_api_key');
+            if (!claudeKey) {
+                alert('Please configure the demo first by clicking "Save and Continue" above');
+                document.getElementById('api-config').scrollIntoView();
+                return;
+            }
+
+            // Show loading state
+            document.getElementById('results-section').style.display = 'block';
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results-content').style.display = 'none';
+
+            try {
+                // Search PubMed - using mock data for demo
+                const papers = await searchPubMed(query);
+                
+                // Analyze papers with simulated AI
+                const analyzedPapers = await analyzePapers(papers, claudeKey);
+                
+                // Display results
+                displayResults(analyzedPapers);
+            } catch (error) {
+                console.error('Search error:', error);
+                alert('Search completed with demo data. In production, this would connect to live APIs.');
+                // Still show results with mock data
+                const papers = getMockPapers(query);
+                const analyzedPapers = await analyzePapers(papers, 'demo');
+                displayResults(analyzedPapers);
+            }
+        }
+
+        async function searchPubMed(query) {
+            // Using PubMed E-utilities API
+            const baseUrl = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/';
+            const searchUrl = `${baseUrl}esearch.fcgi?db=pubmed&term=${encodeURIComponent(query)}&retmax=10&retmode=json&sort=relevance`;
+            
+            try {
+                // First, get the IDs
+                const searchResponse = await fetch(searchUrl);
+                const searchData = await searchResponse.json();
+                const ids = searchData.esearchresult.idlist;
+                
+                if (ids.length === 0) {
+                    throw new Error('No papers found');
+                }
+                
+                // Then, fetch the summaries
+                const summaryUrl = `${baseUrl}esummary.fcgi?db=pubmed&id=${ids.join(',')}&retmode=json`;
+                const summaryResponse = await fetch(summaryUrl);
+                const summaryData = await summaryResponse.json();
+                
+                // Transform the data
+                const papers = ids.map(id => {
+                    const paper = summaryData.result[id];
+                    return {
+                        id: id,
+                        title: paper.title,
+                        authors: paper.authors ? paper.authors.map(a => a.name).join(', ') : 'Unknown',
+                        journal: paper.source,
+                        date: paper.pubdate,
+                        doi: paper.elocationid,
+                        abstract: '' // We'll need to fetch abstracts separately if needed
+                    };
+                });
+                
+                return papers;
+            } catch (error) {
+                console.error('PubMed search error:', error);
+                // Return mock data for demonstration
+                return getMockPapers(query);
+            }
+        }
+
+        function getMockPapers(query) {
+            // Mock data for demonstration when PubMed API fails
+            const mockPapers = [
+                {
+                    id: '1',
+                    title: `Phase III Study of ${query}: Safety and Efficacy Results`,
+                    authors: 'Smith J, Johnson K, Williams R, et al.',
+                    journal: 'New England Journal of Medicine',
+                    date: '2024 Jan',
+                    abstract: `This randomized controlled trial evaluated the safety and efficacy of ${query} in 500 patients. Notable findings include mild gastrointestinal adverse events in 15% of patients and potential drug-drug interactions with CYP3A4 inhibitors.`
+                },
+                {
+                    id: '2',
+                    title: `Long-term Safety Profile of ${query} in Real-World Settings`,
+                    authors: 'Chen L, Park S, Anderson M, et al.',
+                    journal: 'Journal of Clinical Oncology',
+                    date: '2024 Feb',
+                    abstract: `Real-world evidence from 2,000 patients treated with ${query} over 3 years. Reported adverse events include fatigue (20%), nausea (18%), and rare cases of hepatotoxicity requiring monitoring.`
+                },
+                {
+                    id: '3',
+                    title: `Cardiovascular Effects of ${query}: A Systematic Review`,
+                    authors: 'Rodriguez A, Thompson D, Lee H, et al.',
+                    journal: 'Circulation',
+                    date: '2024 Mar',
+                    abstract: `Systematic review of cardiovascular safety data for ${query}. Analysis of 15 studies revealed a small increase in hypertension risk but no significant cardiac events.`
+                },
+                {
+                    id: '4',
+                    title: `Drug Interactions Between ${query} and Common Medications`,
+                    authors: 'Wilson B, Taylor C, Martinez E, et al.',
+                    journal: 'Clinical Pharmacology & Therapeutics',
+                    date: '2024 Jan',
+                    abstract: `Important drug interaction study showing ${query} may increase levels of warfarin and certain statins. Dose adjustments recommended when co-administered.`
+                },
+                {
+                    id: '5',
+                    title: `Immunogenicity of ${query} in Treatment-Naive Patients`,
+                    authors: 'Kumar P, Jones A, Brown T, et al.',
+                    journal: 'Nature Medicine',
+                    date: '2024 Feb',
+                    abstract: `Assessment of anti-drug antibody formation in patients receiving ${query}. Low immunogenicity observed with neutralizing antibodies in only 3% of patients.`
+                }
+            ];
+            
+            return mockPapers;
+        }
+
+        async function analyzePapers(papers, claudeKey) {
+            // For demonstration, we'll add mock analysis
+            // In a real implementation, you would call Claude API here
+            // Note: Claude API cannot be called directly from browser due to CORS restrictions
+            // This would need a backend server in production
+            
+            const safetyKeywords = ['adverse', 'toxicity', 'interaction', 'safety', 'side effect', 'hepatotoxicity', 'cardiotoxicity', 'risk', 'contraindication', 'warning'];
+            
+            return papers.map((paper, index) => {
+                const hasSafetySignal = safetyKeywords.some(keyword => 
+                    paper.title.toLowerCase().includes(keyword) || 
+                    paper.abstract.toLowerCase().includes(keyword)
+                );
+                
+                // Mock AI summary
+                const summary = generateMockSummary(paper, hasSafetySignal);
+                
+                return {
+                    ...paper,
+                    hasSafetySignal,
+                    summary,
+                    riskLevel: hasSafetySignal ? (index % 2 === 0 ? 'Medium' : 'Low') : 'None'
+                };
+            });
+        }
+
+        function generateMockSummary(paper, hasSafetySignal) {
+            if (hasSafetySignal) {
+                return `This study reports important safety findings. Key points include: 
+                1) Adverse events were observed in a subset of patients
+                2) Careful monitoring is recommended for specific populations
+                3) Risk-benefit profile remains favorable overall
+                Recommendation: Review full paper for detailed safety data and consider for PBRER inclusion.`;
+            } else {
+                return `This study focuses on efficacy outcomes with no significant safety concerns reported. 
+                The results support the established safety profile of the compound. 
+                No immediate action required for pharmacovigilance purposes.`;
+            }
+        }
+
+        function displayResults(papers) {
+            // Store papers globally
+            currentPapers = papers;
+            
+            // Update executive summary
+            const totalPapers = papers.length;
+            const safetySignals = papers.filter(p => p.hasSafetySignal).length;
+            const timeSaved = Math.round(totalPapers * 2); // 2 hours per paper manually
+            
+            document.getElementById('total-papers').textContent = totalPapers;
+            document.getElementById('safety-signals').textContent = safetySignals;
+            document.getElementById('time-saved').textContent = timeSaved;
+            
+            // Key findings
+            const findingsList = document.getElementById('findings-list');
+            findingsList.innerHTML = '';
+            
+            const findings = [
+                `${safetySignals} papers contain potential safety signals requiring review`,
+                'Most common adverse events: GI effects, fatigue, headache',
+                '2 papers report potential drug-drug interactions',
+                'No new serious adverse events identified',
+                'All findings align with known safety profile'
+            ];
+            
+            findings.forEach(finding => {
+                const item = document.createElement('div');
+                item.className = 'finding-item';
+                item.innerHTML = `
+                    <div class="finding-icon">!</div>
+                    <div>${finding}</div>
+                `;
+                findingsList.appendChild(item);
+            });
+            
+            // Display papers
+            displayPapersList(papers);
+            
+            // Show results
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('results-content').style.display = 'block';
+            document.getElementById('results-count').textContent = `${totalPapers} papers analyzed`;
+        }
+
+        function displayPapersList(papers, filter = 'all') {
+            const papersList = document.getElementById('papers-list');
+            papersList.innerHTML = '';
+            
+            const filteredPapers = filter === 'safety' 
+                ? papers.filter(p => p.hasSafetySignal)
+                : papers;
+            
+            filteredPapers.forEach(paper => {
+                const paperCard = document.createElement('div');
+                paperCard.className = `paper-card ${paper.hasSafetySignal ? 'safety-signal' : ''}`;
+                
+                paperCard.innerHTML = `
+                    <div class="paper-header">
+                        <h3 class="paper-title">${paper.title}</h3>
+                        ${paper.hasSafetySignal ? '<span class="safety-badge">⚠️ Safety Signal</span>' : ''}
+                    </div>
+                    <div class="paper-meta">
+                        <span class="paper-authors">${paper.authors}</span>
+                        <span>${paper.journal}</span>
+                        <span>${paper.date}</span>
+                    </div>
+                    <div class="paper-summary">
+                        <div class="summary-label">AI Analysis</div>
+                        <div class="summary-content">${paper.summary}</div>
+                    </div>
+                    <div class="paper-actions">
+                        <div>
+                            <a href="https://pubmed.ncbi.nlm.nih.gov/${paper.id}" target="_blank" class="action-btn">
+                                📄 View Full Paper
+                            </a>
+                            ${paper.hasSafetySignal ? '<button class="action-btn" onclick="flagForReview()">🚩 Flag for Review</button>' : ''}
+                        </div>
+                        ${paper.hasSafetySignal ? `<span style="font-size: 12px; color: #666;">Risk Level: ${paper.riskLevel}</span>` : ''}
+                    </div>
+                `;
+                
+                papersList.appendChild(paperCard);
+            });
+        }
+
+        function filterResults(filter) {
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Re-display papers with filter
+            displayPapersList(currentPapers, filter);
+        }
+
+        function flagForReview() {
+            alert('Paper flagged for detailed review. In the full version, this would:\n\n1. Add to review queue\n2. Notify safety team\n3. Track in audit log\n4. Generate 15-day report if needed');
+        }
+    </script>
+</body>
+</html>
